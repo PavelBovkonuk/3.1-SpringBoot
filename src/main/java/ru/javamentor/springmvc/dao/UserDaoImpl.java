@@ -1,6 +1,7 @@
 package ru.javamentor.springmvc.dao;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import ru.javamentor.springmvc.model.User;
@@ -20,12 +21,20 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void saveUser(User user) {
-        entityManager.merge(user);
+        if (user.getId() == null) {
+            entityManager.persist(user);
+        } else {
+            entityManager.merge(user);
+        }
     }
 
     @Override
     public User getUser(Long id) {
-        return entityManager.find(User.class, id);
+        User user = entityManager.find(User.class, id);
+        if (user == null) {
+            throw new EntityNotFoundException();
+        }
+        return user;
     }
 
     @Override
